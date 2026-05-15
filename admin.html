@@ -1,0 +1,1130 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin — Meus Treinos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#0c0c0c;--bg2:#161616;--bg3:#1f1f1f;--bg4:#282828;
+  --accent:#c8f25e;--accent2:#9fdf00;
+  --text:#efefef;--muted:#777;--muted2:#555;
+  --border:#2a2a2a;--border2:#333;
+  --danger:#ff5252;--success:#4caf50;--warning:#ffb300;--info:#29b6f6;
+  --radius:12px;--radius-sm:8px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:15px;line-height:1.5}
+h1,h2,h3{font-family:'Bebas Neue',sans-serif;letter-spacing:1.5px}
+.hidden{display:none!important}
+.flex{display:flex}.items-center{align-items:center}.justify-between{justify-content:space-between}.gap-8{gap:8px}.gap-12{gap:12px}.gap-16{gap:16px}
+.w-full{width:100%}.text-center{text-align:center}
+.text-muted{color:var(--muted)}.text-accent{color:var(--accent)}.text-danger{color:var(--danger)}.text-success{color:var(--success)}.text-warning{color:var(--warning)}
+.mt-8{margin-top:8px}.mt-12{margin-top:12px}.mt-16{margin-top:16px}.mt-24{margin-top:24px}
+.mb-8{margin-bottom:8px}.mb-12{margin-bottom:12px}.mb-16{margin-bottom:16px}.mb-24{margin-bottom:24px}
+
+input,select,textarea{background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:10px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;width:100%;outline:none;transition:border-color .2s}
+input:focus,select:focus,textarea:focus{border-color:var(--accent)}
+input::placeholder,textarea::placeholder{color:var(--muted2)}
+label{font-size:12px;color:var(--muted);display:block;margin-bottom:5px}
+.input-group{display:flex;flex-direction:column;gap:0;margin-bottom:14px}
+
+.btn{border:none;border-radius:var(--radius-sm);padding:10px 18px;font-family:'DM Sans',sans-serif;font-weight:500;font-size:13px;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;justify-content:center;gap:7px}
+.btn-primary{background:var(--accent);color:#111}
+.btn-primary:hover{background:var(--accent2)}
+.btn-ghost{background:none;border:1px solid var(--border2);color:var(--text)}
+.btn-ghost:hover{border-color:var(--accent);color:var(--accent)}
+.btn-danger{background:none;border:1px solid var(--danger);color:var(--danger)}
+.btn-danger:hover{background:var(--danger);color:#fff}
+.btn-success{background:none;border:1px solid var(--success);color:var(--success)}
+.btn-success:hover{background:var(--success);color:#111}
+.btn-sm{padding:6px 12px;font-size:12px}
+.btn-xs{padding:4px 9px;font-size:11px}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn-icon{background:none;border:none;cursor:pointer;padding:5px;transition:all .2s;font-size:15px;color:var(--muted);border-radius:6px;line-height:1}
+.btn-icon:hover{color:var(--text);background:var(--bg3)}
+
+/* LOGIN */
+#login-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--bg);position:relative;overflow:hidden}
+#login-screen::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 20% 50%, rgba(200,242,94,.04) 0%, transparent 60%),radial-gradient(ellipse at 80% 20%, rgba(200,242,94,.03) 0%, transparent 50%);pointer-events:none}
+.login-box{width:100%;max-width:380px;padding:24px;position:relative;z-index:1}
+.login-logo{text-align:center;margin-bottom:32px}
+.login-logo h1{font-size:44px;color:var(--accent)}
+.login-logo p{color:var(--muted);font-size:13px;margin-top:4px}
+.login-badge{display:inline-block;background:rgba(200,242,94,.08);border:1px solid rgba(200,242,94,.2);border-radius:20px;padding:3px 12px;font-size:11px;color:var(--accent);margin-top:8px;letter-spacing:1px;font-family:'Bebas Neue',sans-serif}
+.login-card{background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:28px}
+.login-card h2{font-size:20px;color:var(--text);margin-bottom:22px}
+.login-error{font-size:12px;color:var(--danger);margin-top:6px;display:none}
+
+/* TOPBAR */
+.topbar{background:var(--bg2);border-bottom:1px solid var(--border);padding:0 24px;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.topbar-logo{font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--accent);letter-spacing:2px}
+.topbar-right{display:flex;align-items:center;gap:12px}
+.admin-badge{background:rgba(200,242,94,.1);border:1px solid rgba(200,242,94,.25);border-radius:20px;padding:2px 10px;font-size:11px;color:var(--accent);font-family:'Bebas Neue',sans-serif;letter-spacing:1px}
+
+/* LAYOUT */
+#admin-screen{display:flex;flex-direction:column;min-height:100vh}
+.main{flex:1;padding:24px 16px 40px;max-width:1100px;margin:0 auto;width:100%}
+
+/* STATS BAR */
+.stats-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:28px}
+.stat-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:18px 16px}
+.stat-card .val{font-family:'Bebas Neue',sans-serif;font-size:36px;color:var(--accent);line-height:1}
+.stat-card .lbl{font-size:12px;color:var(--muted);margin-top:4px}
+.stat-card .sub{font-size:11px;color:var(--muted2);margin-top:2px}
+
+/* TOOLBAR */
+.toolbar{display:flex;align-items:center;gap:10px;margin-bottom:18px;flex-wrap:wrap}
+.search-wrap{flex:1;min-width:200px;position:relative}
+.search-wrap input{padding-left:36px}
+.search-icon{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:15px;pointer-events:none}
+.filter-select{width:auto;min-width:140px;flex-shrink:0}
+
+/* TABLE */
+.table-wrap{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.table-header{display:grid;grid-template-columns:var(--cols);gap:0;background:var(--bg3);border-bottom:1px solid var(--border);padding:0 16px}
+.table-header span{padding:11px 8px;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;font-weight:500;cursor:pointer;user-select:none;display:flex;align-items:center;gap:4px}
+.table-header span:hover{color:var(--text)}
+.table-header span.sorted{color:var(--accent)}
+.table-body{max-height:520px;overflow-y:auto}
+.user-row{display:grid;grid-template-columns:var(--cols);gap:0;padding:0 16px;border-bottom:1px solid var(--border);transition:background .15s;align-items:center}
+.user-row:last-child{border-bottom:none}
+.user-row:hover{background:rgba(255,255,255,.02)}
+.user-row > *{padding:13px 8px}
+.user-name-cell{display:flex;align-items:center;gap:10px}
+.avatar-sm{width:30px;height:30px;border-radius:50%;background:var(--bg4);border:1px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:500;color:var(--accent);flex-shrink:0}
+.user-name-text{font-size:14px;font-weight:500}
+.user-email-text{font-size:12px;color:var(--muted)}
+.user-email-cell{font-size:13px;color:var(--muted)}
+.cell-num{font-size:13px;font-family:'Bebas Neue',sans-serif;font-size:16px;color:var(--text);letter-spacing:.5px}
+.cell-date{font-size:12px;color:var(--muted)}
+.cell-actions{display:flex;gap:4px;justify-content:flex-end}
+
+/* STATUS BADGES */
+.badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:500}
+.badge-active{background:rgba(200,242,94,.1);color:var(--accent);border:1px solid rgba(200,242,94,.2)}
+.badge-new{background:rgba(41,182,246,.1);color:var(--info);border:1px solid rgba(41,182,246,.2)}
+.badge-inactive{background:var(--bg3);color:var(--muted);border:1px solid var(--border2)}
+.badge-synced{background:rgba(76,175,80,.1);color:var(--success);border:1px solid rgba(76,175,80,.2)}
+.badge-pending{background:rgba(255,179,0,.1);color:var(--warning);border:1px solid rgba(255,179,0,.2)}
+
+/* SYNC PANEL */
+.sync-panel{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:24px}
+.sync-title{font-family:'Bebas Neue',sans-serif;font-size:18px;color:var(--accent);margin-bottom:4px}
+.sync-desc{font-size:13px;color:var(--muted);margin-bottom:16px}
+.sync-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.sync-status{font-size:13px;display:flex;align-items:center;gap:6px;color:var(--muted)}
+.sync-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.dot-ok{background:var(--success)}
+.dot-warn{background:var(--warning)}
+.dot-err{background:var(--danger)}
+.dot-idle{background:var(--muted2)}
+.sync-log{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px;font-size:12px;color:var(--muted);margin-top:12px;font-family:monospace;max-height:90px;overflow-y:auto;line-height:1.7}
+.log-ok{color:var(--success)}
+.log-err{color:var(--danger)}
+.log-info{color:var(--info)}
+.log-warn{color:var(--warning)}
+
+/* MODAL */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.78);z-index:200;align-items:center;justify-content:center;padding:16px}
+.modal-overlay.open{display:flex}
+.modal{background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:28px;max-width:500px;width:100%;max-height:90vh;overflow-y:auto;position:relative}
+.modal h2{font-size:22px;color:var(--accent);margin-bottom:20px}
+.modal-close{position:absolute;top:16px;right:16px;background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;padding:2px 6px;border-radius:4px;transition:color .2s}
+.modal-close:hover{color:var(--text)}
+.modal-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.detail-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:16px}
+.detail-box{background:var(--bg3);border-radius:var(--radius-sm);padding:14px}
+.detail-box .val{font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--accent);line-height:1}
+.detail-box .lbl{font-size:11px;color:var(--muted);margin-top:3px}
+
+/* TOAST */
+#toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px 20px;font-size:13px;z-index:300;opacity:0;transition:all .3s;pointer-events:none;white-space:nowrap}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+#toast.success{border-color:var(--accent);color:var(--accent)}
+#toast.error{border-color:var(--danger);color:var(--danger)}
+#toast.info{border-color:var(--info);color:var(--info)}
+
+/* EMPTY */
+.empty{text-align:center;padding:50px 20px;color:var(--muted)}
+.empty-icon{font-size:40px;margin-bottom:12px;opacity:.4}
+.empty p{font-size:14px}
+
+/* PAGINATION */
+.pagination{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-top:1px solid var(--border);font-size:13px;color:var(--muted)}
+.page-btns{display:flex;gap:6px}
+.page-btn{background:none;border:1px solid var(--border2);color:var(--muted);border-radius:6px;padding:4px 10px;cursor:pointer;font-size:12px;font-family:'DM Sans',sans-serif;transition:all .2s}
+.page-btn:hover,.page-btn.active{border-color:var(--accent);color:var(--accent)}
+.page-btn:disabled{opacity:.3;cursor:not-allowed}
+
+/* PROGRESS BAR */
+.mini-prog{background:var(--bg4);border-radius:3px;height:3px;margin-top:6px;overflow:hidden}
+.mini-fill{height:100%;background:var(--accent);border-radius:3px;transition:width .5s}
+
+/* MOBILE CARDS (< 700px) */
+.mobile-cards{display:none;flex-direction:column;gap:10px}
+.user-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:16px}
+.user-card-top{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.user-card-info{flex:1;min-width:0}
+.user-card-name{font-weight:500;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.user-card-email{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.user-card-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
+.uc-stat{background:var(--bg3);border-radius:var(--radius-sm);padding:8px;text-align:center}
+.uc-stat .v{font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--accent);line-height:1}
+.uc-stat .l{font-size:10px;color:var(--muted);margin-top:2px}
+.user-card-footer{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.user-card-date{font-size:11px;color:var(--muted2)}
+
+@media(max-width:700px){
+  .stats-bar{grid-template-columns:repeat(2,1fr)}
+  .table-wrap{display:none}
+  .mobile-cards{display:flex}
+  .toolbar{gap:8px}
+  .filter-select{min-width:120px}
+  .main{padding:16px 12px 32px}
+  .topbar{padding:0 14px}
+  .sync-row{flex-direction:column;align-items:flex-start}
+  .modal-row{grid-template-columns:1fr}
+}
+@media(max-width:420px){
+  .stats-bar{grid-template-columns:repeat(2,1fr)}
+  .stat-card .val{font-size:28px}
+}
+
+/* SCROLLBAR */
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:var(--bg2)}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:var(--muted2)}
+
+/* TABS */
+.tabs{display:flex;gap:4px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:4px;margin-bottom:24px;width:fit-content}
+.tab{padding:6px 16px;border-radius:6px;cursor:pointer;font-size:13px;font-weight:500;transition:all .2s;color:var(--muted);border:none;background:none;font-family:'DM Sans',sans-serif}
+.tab.active{background:var(--bg3);color:var(--text)}
+.tab-content{display:none}
+.tab-content.active{display:block}
+
+/* SHEET SETUP */
+.setup-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:24px}
+.setup-card h3{font-size:18px;color:var(--accent);margin-bottom:8px}
+.setup-card p{font-size:13px;color:var(--muted);margin-bottom:16px;line-height:1.7}
+.code-block{background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:12px 14px;font-family:monospace;font-size:12px;color:var(--text);overflow-x:auto;line-height:1.7;margin:12px 0;white-space:pre;position:relative}
+.copy-btn{position:absolute;top:8px;right:8px;background:var(--bg4);border:1px solid var(--border2);color:var(--muted);border-radius:4px;padding:3px 8px;font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s}
+.copy-btn:hover{border-color:var(--accent);color:var(--accent)}
+.step{display:flex;gap:14px;margin-bottom:20px;align-items:flex-start}
+.step-num{background:var(--accent);color:#111;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;margin-top:1px}
+.step-text{font-size:13px;color:var(--muted);line-height:1.7}
+.step-text strong{color:var(--text)}
+</style>
+</head>
+<body>
+
+<!-- ========== LOGIN ========== -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">
+      <h1>⚡ TREINOS</h1>
+      <p>Painel administrativo</p>
+      <span class="login-badge">ADMIN</span>
+    </div>
+    <div class="login-card">
+      <h2>Acesso restrito</h2>
+      <div class="input-group">
+        <label>Senha de administrador</label>
+        <input type="password" id="admin-pass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doAdminLogin()">
+        <div id="login-error" class="login-error">Senha incorreta</div>
+      </div>
+      <button class="btn btn-primary w-full mt-8" onclick="doAdminLogin()">Entrar como Admin</button>
+    </div>
+    <p class="text-center text-muted mt-12" style="font-size:12px">
+      Senha padrão: <code style="color:var(--accent);background:var(--bg2);padding:1px 6px;border-radius:4px">admin123</code><br>
+      <span style="font-size:11px;margin-top:4px;display:block">Altere no código antes de publicar.</span>
+    </p>
+  </div>
+</div>
+
+<!-- ========== ADMIN SCREEN ========== -->
+<div id="admin-screen" class="hidden">
+
+  <div class="topbar">
+    <div class="topbar-logo">⚡ TREINOS <span style="font-size:14px;color:var(--muted);letter-spacing:1px">/ ADMIN</span></div>
+    <div class="topbar-right">
+      <span class="admin-badge">ADMIN</span>
+      <button class="btn btn-xs btn-ghost" onclick="doAdminLogout()">Sair</button>
+    </div>
+  </div>
+
+  <div class="main">
+
+    <!-- TABS -->
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('usuarios',this)">👥 Usuários</button>
+      <button class="tab" onclick="switchTab('configurar',this)">⚙️ Configurar Sheets</button>
+    </div>
+
+    <!-- TAB: USUÁRIOS -->
+    <div class="tab-content active" id="tab-usuarios">
+
+      <!-- STATS BAR -->
+      <div class="stats-bar mb-24" id="stats-bar">
+        <div class="stat-card">
+          <div class="val" id="st-total">0</div>
+          <div class="lbl">Total de usuários</div>
+          <div class="mini-prog"><div class="mini-fill" style="width:100%" id="st-total-p"></div></div>
+        </div>
+        <div class="stat-card">
+          <div class="val" id="st-ativos">0</div>
+          <div class="lbl">Treinaram esta semana</div>
+          <div class="sub" id="st-ativos-sub"></div>
+        </div>
+        <div class="stat-card">
+          <div class="val" id="st-treinos">0</div>
+          <div class="lbl">Treinos registrados</div>
+          <div class="sub" id="st-treinos-sub"></div>
+        </div>
+        <div class="stat-card">
+          <div class="val" id="st-vol">0t</div>
+          <div class="lbl">Volume total (ton)</div>
+          <div class="sub">Todos os usuários</div>
+        </div>
+      </div>
+
+      <!-- SYNC PANEL -->
+      <div class="sync-panel">
+        <div class="sync-title">🔄 Google Sheets — Sincronização</div>
+        <div class="sync-desc">Salva os dados de cadastro dos usuários em uma planilha do Google Sheets via Apps Script. Configure o URL do Webhook na aba "Configurar Sheets".</div>
+        <div class="sync-row">
+          <button class="btn btn-primary btn-sm" onclick="syncAll()" id="btn-sync">⬆ Sincronizar Todos</button>
+          <button class="btn btn-ghost btn-sm" onclick="loadFromSheet()">⬇ Carregar da Planilha</button>
+          <div class="sync-status" id="sync-status">
+            <span class="sync-dot dot-idle" id="sync-dot"></span>
+            <span id="sync-status-text">Aguardando sincronização</span>
+          </div>
+        </div>
+        <div class="sync-log hidden" id="sync-log"></div>
+      </div>
+
+      <!-- TOOLBAR -->
+      <div class="toolbar">
+        <div class="search-wrap">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="search-input" placeholder="Buscar por nome ou e-mail..." oninput="renderTable()">
+        </div>
+        <select class="filter-select" id="filter-status" onchange="renderTable()">
+          <option value="todos">Todos os usuários</option>
+          <option value="ativos">Treinando esta semana</option>
+          <option value="inativos">Sem treino esta semana</option>
+          <option value="novos">Cadastrados hoje</option>
+        </select>
+        <select class="filter-select" id="sort-by" onchange="renderTable()" style="min-width:150px">
+          <option value="nome">Ordenar por nome</option>
+          <option value="cadastro">Data de cadastro</option>
+          <option value="treinos">Nº de treinos</option>
+          <option value="volume">Volume total</option>
+          <option value="streak">Sequência atual</option>
+        </select>
+        <button class="btn btn-ghost btn-sm" onclick="exportCSV()" title="Exportar como CSV">⬇ CSV</button>
+        <button class="btn btn-ghost btn-sm" onclick="loadUsers()" title="Recarregar dados">↺</button>
+      </div>
+
+      <!-- TABLE (desktop) -->
+      <div class="table-wrap" style="--cols: 2fr 2fr 90px 90px 90px 100px 110px 100px">
+        <div class="table-header">
+          <span onclick="setSortCol('nome')" id="th-nome">Nome ↕</span>
+          <span onclick="setSortCol('email')" id="th-email">E-mail ↕</span>
+          <span onclick="setSortCol('treinos')" id="th-treinos">Treinos ↕</span>
+          <span onclick="setSortCol('semanas')" id="th-semanas">Semanas ↕</span>
+          <span onclick="setSortCol('volume')" id="th-volume">Volume ↕</span>
+          <span onclick="setSortCol('cadastro')" id="th-cadastro">Cadastro ↕</span>
+          <span>Status</span>
+          <span>Ações</span>
+        </div>
+        <div class="table-body" id="table-body"></div>
+        <div class="pagination" id="pagination"></div>
+      </div>
+
+      <!-- CARDS (mobile) -->
+      <div class="mobile-cards" id="mobile-cards"></div>
+      <div class="pagination" id="pagination-mobile" style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);margin-top:12px;display:none"></div>
+
+    </div><!-- end tab usuarios -->
+
+    <!-- TAB: CONFIGURAR -->
+    <div class="tab-content" id="tab-configurar">
+      <div class="setup-card">
+        <h3>Como conectar ao Google Sheets</h3>
+        <p>Para salvar os dados dos usuários na sua planilha, você precisa criar um <strong>Google Apps Script</strong> que funciona como endpoint. Siga os passos abaixo:</p>
+
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-text">
+            <strong>Abra o Google Sheets</strong> — acesse sua planilha e vá em <strong>Extensões → Apps Script</strong>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-text">
+            <strong>Cole o seguinte código</strong> no editor e salve (Ctrl+S):
+          </div>
+        </div>
+
+        <div class="code-block" id="apps-script-code"><button class="copy-btn" onclick="copyCode('apps-script-code')">Copiar</button>function doPost(e) {
+  try {
+    var data = JSON.parse(e.postData.contents);
+    var sheet = SpreadsheetApp.getActiveSpreadsheet()
+                  .getSheetByName("Usuarios") 
+                  || SpreadsheetApp.getActiveSpreadsheet()
+                       .insertSheet("Usuarios");
+
+    // Cabeçalho se vazio
+    if (sheet.getLastRow() === 0) {
+      sheet.appendRow([
+        "Nome","E-mail","Cadastro","Treinos Totais",
+        "Semanas","Volume (kg)","Sequência","Última Sincronização"
+      ]);
+      sheet.getRange(1,1,1,8).setFontWeight("bold")
+           .setBackground("#c8f25e").setFontColor("#111111");
+    }
+
+    var users = data.users || [];
+    // Limpar dados antigos (manter header)
+    if (sheet.getLastRow() > 1) {
+      sheet.getRange(2, 1, sheet.getLastRow()-1, 8).clearContent();
+    }
+
+    users.forEach(function(u) {
+      sheet.appendRow([
+        u.nome, u.email, u.cadastro,
+        u.treinos, u.semanas, u.volume,
+        u.streak, new Date().toLocaleString("pt-BR")
+      ]);
+    });
+
+    return ContentService
+      .createTextOutput(JSON.stringify({ok: true, count: users.length}))
+      .setMimeType(ContentService.MimeType.JSON);
+  } catch(err) {
+    return ContentService
+      .createTextOutput(JSON.stringify({ok: false, error: err.toString()}))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+function doGet(e) {
+  var sheet = SpreadsheetApp.getActiveSpreadsheet()
+                .getSheetByName("Usuarios");
+  if (!sheet || sheet.getLastRow() < 2) {
+    return ContentService
+      .createTextOutput(JSON.stringify({ok: true, users: []}))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+  var rows = sheet.getRange(2, 1, sheet.getLastRow()-1, 7).getValues();
+  var users = rows.map(function(r) {
+    return {nome:r[0],email:r[1],cadastro:r[2],treinos:r[3],semanas:r[4],volume:r[5],streak:r[6]};
+  });
+  return ContentService
+    .createTextOutput(JSON.stringify({ok: true, users: users}))
+    .setMimeType(ContentService.MimeType.JSON);
+}</div>
+
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-text">
+            Clique em <strong>Implantar → Nova implantação</strong>. Selecione tipo <strong>Aplicativo da Web</strong>. Em "Quem tem acesso" escolha <strong>Qualquer pessoa</strong>. Clique em <strong>Implantar</strong> e copie a URL gerada.
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">4</div>
+          <div class="step-text">Cole a URL do Web App abaixo e salve:</div>
+        </div>
+
+        <div class="input-group">
+          <label>URL do Google Apps Script (Web App)</label>
+          <input type="url" id="webhook-url" placeholder="https://script.google.com/macros/s/XXXXX/exec" oninput="saveWebhookUrl()">
+        </div>
+
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:4px">
+          <button class="btn btn-primary btn-sm" onclick="testWebhook()">Testar conexão</button>
+          <button class="btn btn-ghost btn-sm" onclick="clearWebhookUrl()">Limpar URL</button>
+        </div>
+        <div id="webhook-test-result" style="font-size:13px;margin-top:10px;display:none"></div>
+
+        <div style="margin-top:24px;padding-top:20px;border-top:1px solid var(--border)">
+          <p style="font-size:12px;color:var(--muted);line-height:1.8">
+            ⚠️ <strong style="color:var(--text)">Importante:</strong> A senha admin padrão é <code style="color:var(--accent);background:var(--bg3);padding:1px 6px;border-radius:4px">admin123</code>. 
+            Para alterar, edite a constante <code style="color:var(--accent);background:var(--bg3);padding:1px 6px;border-radius:4px">ADMIN_PASS</code> no JavaScript desta página antes de publicar.<br><br>
+            🔒 Os dados dos usuários ficam salvos no <code style="color:var(--accent);background:var(--bg3);padding:1px 6px;border-radius:4px">localStorage</code> do navegador de cada um. Esta página admin lê esses dados apenas quando aberta no mesmo navegador onde os usuários estão cadastrados (ex: para testes locais). Para um sistema multi-dispositivo real, integre com backend/Firebase.
+          </p>
+        </div>
+      </div>
+    </div><!-- end tab configurar -->
+
+  </div><!-- end main -->
+</div><!-- end admin-screen -->
+
+<!-- MODAL: DETALHES DO USUÁRIO -->
+<div class="modal-overlay" id="modal-user">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <h2 id="modal-user-title">Usuário</h2>
+    <div class="detail-grid" id="modal-stats"></div>
+    <div id="modal-user-body"></div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:20px" id="modal-actions"></div>
+  </div>
+</div>
+
+<!-- MODAL: DELETAR -->
+<div class="modal-overlay" id="modal-delete">
+  <div class="modal" style="max-width:400px">
+    <button class="modal-close" onclick="closeDeleteModal()">✕</button>
+    <h2 style="color:var(--danger)">⚠ Deletar usuário</h2>
+    <p style="font-size:14px;color:var(--muted);margin-bottom:20px" id="delete-msg"></p>
+    <div style="display:flex;gap:10px">
+      <button class="btn btn-danger w-full" onclick="confirmDelete()">Sim, deletar</button>
+      <button class="btn btn-ghost w-full" onclick="closeDeleteModal()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ============================================================
+// CONSTANTS
+// ============================================================
+const ADMIN_PASS = 'admin123'; // Altere antes de publicar!
+const STORE_USERS = 'wt_users';
+const STORE_PREFIX = 'wt_data_';
+const WEBHOOK_KEY = 'admin_webhook_url';
+const DIAS = ['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'];
+
+let allUsers = [];
+let filteredUsers = [];
+let currentPage = 1;
+const PAGE_SIZE = 15;
+let sortCol = 'nome';
+let sortDir = 1;
+let deleteTarget = null;
+
+// ============================================================
+// AUTH
+// ============================================================
+function doAdminLogin() {
+  const pass = document.getElementById('admin-pass').value;
+  if (pass === ADMIN_PASS) {
+    document.getElementById('login-screen').classList.add('hidden');
+    document.getElementById('admin-screen').classList.remove('hidden');
+    document.getElementById('webhook-url').value = localStorage.getItem(WEBHOOK_KEY) || '';
+    loadUsers();
+    loadLog();
+  } else {
+    document.getElementById('login-error').style.display = 'block';
+    document.getElementById('admin-pass').style.borderColor = 'var(--danger)';
+    setTimeout(() => { document.getElementById('admin-pass').style.borderColor = ''; }, 1500);
+  }
+}
+
+function doAdminLogout() {
+  document.getElementById('login-screen').classList.remove('hidden');
+  document.getElementById('admin-screen').classList.add('hidden');
+  document.getElementById('admin-pass').value = '';
+}
+
+// ============================================================
+// TABS
+// ============================================================
+function switchTab(name, btn) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('tab-' + name).classList.add('active');
+}
+
+// ============================================================
+// LOAD USERS FROM LOCALSTORAGE
+// ============================================================
+function loadUsers() {
+  const raw = localStorage.getItem(STORE_USERS);
+  if (!raw) { allUsers = []; renderTable(); updateStats(); return; }
+  const users = JSON.parse(raw);
+  allUsers = Object.entries(users).map(([email, u]) => {
+    const data = getUserData(email);
+    const stats = calcStats(data);
+    const cadastro = u.createdAt ? new Date(u.createdAt) : null;
+    return {
+      email,
+      nome: u.name || email,
+      passHash: u.passHash,
+      cadastro,
+      cadastroStr: cadastro ? cadastro.toLocaleDateString('pt-BR') : '—',
+      treinos: stats.treinos,
+      semanas: stats.semanas,
+      volume: stats.volume,
+      streak: stats.streak,
+      ativos: stats.treinouEstaSemana,
+      novo: cadastro ? isToday(cadastro) : false,
+      syncStatus: 'pending'
+    };
+  });
+  renderTable();
+  updateStats();
+}
+
+function getUserData(email) {
+  try { return JSON.parse(localStorage.getItem(STORE_PREFIX + email) || 'null'); } catch(e) { return null; }
+}
+
+function calcStats(data) {
+  if (!data) return {treinos:0,semanas:0,volume:0,streak:0,treinouEstaSemana:false};
+  let treinos=0, volume=0;
+  const weeks = Object.values(data.weeks || {});
+  const semanas = weeks.length;
+  weeks.forEach(w => {
+    DIAS.forEach(d => {
+      if (w.days[d] && w.days[d].done) {
+        treinos++;
+        (w.days[d].exercises || []).forEach(e => {
+          const r = parseInt(e.reps) || 1;
+          volume += (e.carga || 0) * (e.series || 1) * r;
+        });
+      }
+    });
+  });
+  // Streak (consecutive days from today)
+  let streak = 0;
+  const today = new Date(); today.setHours(0,0,0,0);
+  for (let i = 0; i < 60; i++) {
+    const d = new Date(today); d.setDate(today.getDate() - i);
+    const wKey = getWeekKey(d);
+    const dName = DIAS[((d.getDay() + 6) % 7)];
+    if (data.weeks[wKey] && data.weeks[wKey].days[dName] && data.weeks[wKey].days[dName].done) {
+      streak++;
+    } else { break; }
+  }
+  // Esta semana
+  const thisWeek = getWeekKey(new Date());
+  let treinouEstaSemana = false;
+  if (data.weeks[thisWeek]) {
+    treinouEstaSemana = DIAS.some(d => data.weeks[thisWeek].days[d] && data.weeks[thisWeek].days[d].done);
+  }
+  return {treinos, semanas, volume: Math.round(volume), streak, treinouEstaSemana};
+}
+
+function getWeekKey(date) {
+  const d = new Date(date);
+  d.setHours(0,0,0,0);
+  d.setDate(d.getDate() + 3 - ((d.getDay()+6)%7));
+  const week1 = new Date(d.getFullYear(),0,4);
+  const wn = 1 + Math.round(((d-week1)/86400000 - 3 + ((week1.getDay()+6)%7))/7);
+  return `${d.getFullYear()}-W${String(wn).padStart(2,'0')}`;
+}
+
+function isToday(date) {
+  const t = new Date(); 
+  return date.getDate()===t.getDate() && date.getMonth()===t.getMonth() && date.getFullYear()===t.getFullYear();
+}
+
+// ============================================================
+// STATS BAR
+// ============================================================
+function updateStats() {
+  const total = allUsers.length;
+  const ativos = allUsers.filter(u => u.ativos).length;
+  const totalTreinos = allUsers.reduce((s,u) => s + u.treinos, 0);
+  const totalVol = allUsers.reduce((s,u) => s + u.volume, 0);
+
+  document.getElementById('st-total').textContent = total;
+  document.getElementById('st-ativos').textContent = ativos;
+  document.getElementById('st-ativos-sub').textContent = total > 0 ? `${Math.round(ativos/total*100)}% do total` : '';
+  document.getElementById('st-treinos').textContent = totalTreinos;
+  document.getElementById('st-treinos-sub').textContent = total > 0 ? `${(totalTreinos/Math.max(total,1)).toFixed(1)} por usuário` : '';
+  document.getElementById('st-vol').textContent = (totalVol/1000).toFixed(1) + 't';
+}
+
+// ============================================================
+// TABLE RENDER
+// ============================================================
+function setSortCol(col) {
+  if (sortCol === col) sortDir *= -1;
+  else { sortCol = col; sortDir = 1; }
+  document.querySelectorAll('.table-header span').forEach(s => s.classList.remove('sorted'));
+  const th = document.getElementById('th-' + col);
+  if (th) th.classList.add('sorted');
+  renderTable();
+}
+
+function renderTable() {
+  const search = document.getElementById('search-input').value.trim().toLowerCase();
+  const filterStatus = document.getElementById('filter-status').value;
+  const sortBy = document.getElementById('sort-by').value;
+  if (sortBy !== sortCol) sortCol = sortBy;
+
+  filteredUsers = allUsers.filter(u => {
+    const matchSearch = !search || u.nome.toLowerCase().includes(search) || u.email.toLowerCase().includes(search);
+    const matchStatus = filterStatus === 'todos' ||
+      (filterStatus === 'ativos' && u.ativos) ||
+      (filterStatus === 'inativos' && !u.ativos) ||
+      (filterStatus === 'novos' && u.novo);
+    return matchSearch && matchStatus;
+  });
+
+  filteredUsers.sort((a,b) => {
+    let va = a[sortCol], vb = b[sortCol];
+    if (typeof va === 'string') va = va.toLowerCase();
+    if (typeof vb === 'string') vb = vb.toLowerCase();
+    if (va instanceof Date) va = va ? va.getTime() : 0;
+    if (vb instanceof Date) vb = vb ? vb.getTime() : 0;
+    return (va < vb ? -1 : va > vb ? 1 : 0) * sortDir;
+  });
+
+  const total = filteredUsers.length;
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  if (currentPage > totalPages) currentPage = 1;
+  const slice = filteredUsers.slice((currentPage-1)*PAGE_SIZE, currentPage*PAGE_SIZE);
+
+  // Desktop table
+  const tbody = document.getElementById('table-body');
+  tbody.innerHTML = '';
+  if (slice.length === 0) {
+    tbody.innerHTML = '<div class="empty"><div class="empty-icon">👥</div><p>Nenhum usuário encontrado.</p></div>';
+  } else {
+    slice.forEach(u => {
+      const row = document.createElement('div');
+      row.className = 'user-row';
+      const statusBadge = u.novo ? '<span class="badge badge-new">Novo</span>' :
+                          u.ativos ? '<span class="badge badge-active">Ativo</span>' :
+                          '<span class="badge badge-inactive">Inativo</span>';
+      row.innerHTML = `
+        <div class="user-name-cell">
+          <div class="avatar-sm">${u.nome[0].toUpperCase()}</div>
+          <div>
+            <div class="user-name-text">${esc(u.nome)}</div>
+          </div>
+        </div>
+        <div class="user-email-cell">${esc(u.email)}</div>
+        <div class="cell-num">${u.treinos}</div>
+        <div class="cell-num">${u.semanas}</div>
+        <div class="cell-num">${u.volume > 0 ? (u.volume >= 1000 ? (u.volume/1000).toFixed(1)+'t' : u.volume+'kg') : '—'}</div>
+        <div class="cell-date">${u.cadastroStr}</div>
+        <div>${statusBadge}</div>
+        <div class="cell-actions">
+          <button class="btn-icon" title="Ver detalhes" onclick="openUserModal('${u.email}')">👁</button>
+          <button class="btn-icon" title="Deletar usuário" onclick="openDeleteModal('${u.email}')" style="color:var(--danger)">🗑</button>
+        </div>`;
+      tbody.appendChild(row);
+    });
+  }
+
+  // Mobile cards
+  const mobileCards = document.getElementById('mobile-cards');
+  mobileCards.innerHTML = '';
+  if (slice.length === 0) {
+    mobileCards.innerHTML = '<div class="empty"><div class="empty-icon">👥</div><p>Nenhum usuário encontrado.</p></div>';
+  } else {
+    slice.forEach(u => {
+      const card = document.createElement('div');
+      card.className = 'user-card';
+      const statusBadge = u.novo ? '<span class="badge badge-new">Novo</span>' :
+                          u.ativos ? '<span class="badge badge-active">Ativo</span>' :
+                          '<span class="badge badge-inactive">Inativo</span>';
+      card.innerHTML = `
+        <div class="user-card-top">
+          <div class="avatar-sm" style="width:38px;height:38px;font-size:15px">${u.nome[0].toUpperCase()}</div>
+          <div class="user-card-info">
+            <div class="user-card-name">${esc(u.nome)}</div>
+            <div class="user-card-email">${esc(u.email)}</div>
+          </div>
+          ${statusBadge}
+        </div>
+        <div class="user-card-stats">
+          <div class="uc-stat"><div class="v">${u.treinos}</div><div class="l">Treinos</div></div>
+          <div class="uc-stat"><div class="v">${u.semanas}</div><div class="l">Semanas</div></div>
+          <div class="uc-stat"><div class="v">${u.volume > 0 ? (u.volume >= 1000 ? (u.volume/1000).toFixed(1)+'t' : u.volume+'kg') : '—'}</div><div class="l">Volume</div></div>
+        </div>
+        <div class="user-card-footer">
+          <span class="user-card-date">Cadastro: ${u.cadastroStr}</span>
+          <div style="display:flex;gap:6px">
+            <button class="btn btn-xs btn-ghost" onclick="openUserModal('${u.email}')">Ver</button>
+            <button class="btn btn-xs btn-danger" onclick="openDeleteModal('${u.email}')">Deletar</button>
+          </div>
+        </div>`;
+      mobileCards.appendChild(card);
+    });
+  }
+
+  // Pagination
+  renderPagination('pagination', total, totalPages);
+  renderPagination('pagination-mobile', total, totalPages);
+  document.getElementById('pagination-mobile').style.display = total > PAGE_SIZE ? 'flex' : 'none';
+}
+
+function renderPagination(id, total, totalPages) {
+  const el = document.getElementById(id);
+  let btns = '';
+  for (let i = 1; i <= totalPages; i++) {
+    btns += `<button class="page-btn ${i===currentPage?'active':''}" onclick="goPage(${i})">${i}</button>`;
+  }
+  el.innerHTML = `
+    <span>${total} usuário${total!==1?'s':''} encontrado${total!==1?'s':''}</span>
+    <div class="page-btns">
+      <button class="page-btn" onclick="goPage(${currentPage-1})" ${currentPage<=1?'disabled':''}>‹</button>
+      ${btns}
+      <button class="page-btn" onclick="goPage(${currentPage+1})" ${currentPage>=totalPages?'disabled':''}>›</button>
+    </div>`;
+}
+
+function goPage(p) {
+  const total = filteredUsers.length;
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  if (p < 1 || p > totalPages) return;
+  currentPage = p;
+  renderTable();
+}
+
+// ============================================================
+// USER MODAL
+// ============================================================
+function openUserModal(email) {
+  const u = allUsers.find(x => x.email === email);
+  if (!u) return;
+  const data = getUserData(email);
+
+  document.getElementById('modal-user-title').textContent = u.nome;
+
+  document.getElementById('modal-stats').innerHTML = `
+    <div class="detail-box"><div class="val">${u.treinos}</div><div class="lbl">Treinos totais</div></div>
+    <div class="detail-box"><div class="val">${u.semanas}</div><div class="lbl">Semanas ativas</div></div>
+    <div class="detail-box"><div class="val">${u.volume >= 1000 ? (u.volume/1000).toFixed(1)+'t' : u.volume+'kg'}</div><div class="lbl">Volume total</div></div>
+    <div class="detail-box"><div class="val">${u.streak}</div><div class="lbl">Sequência atual</div></div>`;
+
+  // Recent weeks
+  let weeksHtml = '';
+  if (data) {
+    const weeks = Object.values(data.weeks || {}).sort((a,b) => b.key.localeCompare(a.key)).slice(0,4);
+    if (weeks.length > 0) {
+      weeksHtml = '<div style="margin-top:4px"><div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">Últimas semanas</div>';
+      weeks.forEach(w => {
+        const done = DIAS.filter(d => w.days[d] && w.days[d].done).length;
+        const pct = Math.round(done/5*100);
+        weeksHtml += `<div style="margin-bottom:10px">
+          <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px">
+            <span style="color:var(--muted)">${w.label}</span>
+            <span style="color:var(--accent)">${done}/5 dias</span>
+          </div>
+          <div class="mini-prog"><div class="mini-fill" style="width:${pct}%"></div></div>
+        </div>`;
+      });
+      weeksHtml += '</div>';
+    }
+  }
+
+  document.getElementById('modal-user-body').innerHTML = `
+    <div style="margin-bottom:16px">
+      <div style="font-size:12px;color:var(--muted);margin-bottom:2px">E-mail</div>
+      <div style="font-size:14px">${esc(u.email)}</div>
+    </div>
+    <div style="margin-bottom:16px">
+      <div style="font-size:12px;color:var(--muted);margin-bottom:2px">Data de cadastro</div>
+      <div style="font-size:14px">${u.cadastroStr}</div>
+    </div>
+    ${weeksHtml}`;
+
+  document.getElementById('modal-actions').innerHTML = `
+    <button class="btn btn-ghost btn-sm" onclick="syncUser('${email}')">⬆ Sincronizar com Sheets</button>
+    <button class="btn btn-danger btn-sm" onclick="closeModal();openDeleteModal('${email}')">🗑 Deletar</button>`;
+
+  document.getElementById('modal-user').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('modal-user').classList.remove('open');
+}
+
+// ============================================================
+// DELETE
+// ============================================================
+function openDeleteModal(email) {
+  const u = allUsers.find(x => x.email === email);
+  deleteTarget = email;
+  document.getElementById('delete-msg').textContent = `Deseja deletar permanentemente o usuário "${u ? u.nome : email}" e todos os seus dados de treino?`;
+  document.getElementById('modal-delete').classList.add('open');
+}
+
+function closeDeleteModal() {
+  document.getElementById('modal-delete').classList.remove('open');
+  deleteTarget = null;
+}
+
+function confirmDelete() {
+  if (!deleteTarget) return;
+  const users = JSON.parse(localStorage.getItem(STORE_USERS) || '{}');
+  const name = users[deleteTarget]?.name || deleteTarget;
+  delete users[deleteTarget];
+  localStorage.setItem(STORE_USERS, JSON.stringify(users));
+  localStorage.removeItem(STORE_PREFIX + deleteTarget);
+  // Clear session if active
+  try {
+    const sess = JSON.parse(sessionStorage.getItem('wt_session') || '{}');
+    if (sess.email === deleteTarget) sessionStorage.removeItem('wt_session');
+  } catch(e) {}
+  closeDeleteModal();
+  loadUsers();
+  toast(`Usuário "${name}" deletado`, 'error');
+  addLog(`Usuário deletado: ${name} (${deleteTarget})`, 'warn');
+}
+
+// ============================================================
+// GOOGLE SHEETS SYNC
+// ============================================================
+function getWebhookUrl() {
+  return (document.getElementById('webhook-url').value || '').trim() || localStorage.getItem(WEBHOOK_KEY) || '';
+}
+
+function saveWebhookUrl() {
+  const url = document.getElementById('webhook-url').value.trim();
+  localStorage.setItem(WEBHOOK_KEY, url);
+}
+
+function clearWebhookUrl() {
+  document.getElementById('webhook-url').value = '';
+  localStorage.removeItem(WEBHOOK_KEY);
+  toast('URL removida', '');
+}
+
+function setSyncStatus(state, msg) {
+  const dot = document.getElementById('sync-dot');
+  const txt = document.getElementById('sync-status-text');
+  dot.className = 'sync-dot';
+  if (state === 'ok') dot.classList.add('dot-ok');
+  else if (state === 'err') dot.classList.add('dot-err');
+  else if (state === 'busy') dot.classList.add('dot-warn');
+  else dot.classList.add('dot-idle');
+  txt.textContent = msg;
+}
+
+function buildPayload() {
+  return {
+    users: allUsers.map(u => ({
+      nome: u.nome,
+      email: u.email,
+      cadastro: u.cadastroStr,
+      treinos: u.treinos,
+      semanas: u.semanas,
+      volume: u.volume,
+      streak: u.streak
+    }))
+  };
+}
+
+async function syncAll() {
+  const url = getWebhookUrl();
+  if (!url) {
+    toast('Configure o URL do Apps Script primeiro', 'error');
+    switchTab('configurar', document.querySelectorAll('.tab')[1]);
+    return;
+  }
+  const btn = document.getElementById('btn-sync');
+  btn.disabled = true;
+  btn.textContent = '⏳ Sincronizando...';
+  setSyncStatus('busy', 'Enviando dados...');
+  document.getElementById('sync-log').classList.remove('hidden');
+  addLog('Iniciando sincronização de ' + allUsers.length + ' usuário(s)...', 'info');
+
+  try {
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(buildPayload())
+    });
+    const data = await res.json();
+    if (data.ok) {
+      setSyncStatus('ok', `Sincronizado! ${data.count || allUsers.length} usuário(s) — ${new Date().toLocaleTimeString('pt-BR')}`);
+      allUsers.forEach(u => u.syncStatus = 'synced');
+      addLog(`Sincronização concluída: ${data.count || allUsers.length} usuários enviados.`, 'ok');
+      toast('Sincronização concluída!', 'success');
+      renderTable();
+    } else {
+      throw new Error(data.error || 'Erro desconhecido');
+    }
+  } catch(err) {
+    setSyncStatus('err', 'Erro na sincronização');
+    addLog('Erro: ' + err.message, 'err');
+    toast('Erro ao sincronizar: ' + err.message, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '⬆ Sincronizar Todos';
+  }
+}
+
+async function syncUser(email) {
+  const u = allUsers.find(x => x.email === email);
+  if (!u) return;
+  const url = getWebhookUrl();
+  if (!url) { toast('Configure o URL do Apps Script primeiro', 'error'); return; }
+  toast('Sincronizando ' + u.nome + '...', 'info');
+  addLog('Sincronizando usuário: ' + u.nome, 'info');
+  try {
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({users: [{nome:u.nome,email:u.email,cadastro:u.cadastroStr,treinos:u.treinos,semanas:u.semanas,volume:u.volume,streak:u.streak}]})
+    });
+    const data = await res.json();
+    if (data.ok) { toast(u.nome + ' sincronizado!', 'success'); addLog('OK: ' + u.nome, 'ok'); }
+    else throw new Error(data.error);
+  } catch(err) {
+    toast('Erro: ' + err.message, 'error');
+    addLog('Erro ao sincronizar ' + u.nome + ': ' + err.message, 'err');
+  }
+}
+
+async function loadFromSheet() {
+  const url = getWebhookUrl();
+  if (!url) { toast('Configure o URL do Apps Script primeiro', 'error'); return; }
+  setSyncStatus('busy', 'Carregando da planilha...');
+  addLog('Buscando dados da planilha...', 'info');
+  try {
+    const res = await fetch(url + '?action=get');
+    const data = await res.json();
+    if (data.ok && data.users && data.users.length > 0) {
+      toast(data.users.length + ' usuários carregados da planilha', 'success');
+      addLog(data.users.length + ' usuários encontrados na planilha.', 'ok');
+      setSyncStatus('ok', 'Dados carregados da planilha');
+    } else {
+      toast('Planilha vazia ou sem novos dados', '');
+      addLog('Planilha não retornou dados.', 'warn');
+      setSyncStatus('idle', 'Planilha vazia');
+    }
+  } catch(err) {
+    setSyncStatus('err', 'Erro ao carregar');
+    addLog('Erro: ' + err.message, 'err');
+    toast('Erro ao carregar: ' + err.message, 'error');
+  }
+}
+
+async function testWebhook() {
+  const url = (document.getElementById('webhook-url').value || '').trim();
+  const res_el = document.getElementById('webhook-test-result');
+  if (!url) { res_el.style.display = 'block'; res_el.style.color = 'var(--danger)'; res_el.textContent = '⚠ Digite a URL primeiro.'; return; }
+  saveWebhookUrl();
+  res_el.style.display = 'block';
+  res_el.style.color = 'var(--muted)';
+  res_el.textContent = '⏳ Testando conexão...';
+  try {
+    const r = await fetch(url, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({users: [{nome:'Teste Admin',email:'teste@admin.com',cadastro:new Date().toLocaleDateString('pt-BR'),treinos:0,semanas:0,volume:0,streak:0}]})
+    });
+    const d = await r.json();
+    if (d.ok) {
+      res_el.style.color = 'var(--success)';
+      res_el.textContent = '✓ Conexão OK! Apps Script respondeu corretamente.';
+    } else {
+      res_el.style.color = 'var(--danger)';
+      res_el.textContent = '✗ Erro: ' + (d.error || 'Resposta inesperada');
+    }
+  } catch(err) {
+    res_el.style.color = 'var(--danger)';
+    res_el.textContent = '✗ Falha na conexão: ' + err.message + '. Verifique a URL e as permissões do Apps Script.';
+  }
+}
+
+// ============================================================
+// SYNC LOG
+// ============================================================
+const LOG_KEY = 'admin_sync_log';
+
+function addLog(msg, type = '') {
+  const log = document.getElementById('sync-log');
+  log.classList.remove('hidden');
+  const time = new Date().toLocaleTimeString('pt-BR');
+  const cls = type ? 'log-' + type : '';
+  log.innerHTML += `<span class="${cls}">[${time}] ${msg}</span>\n`;
+  log.scrollTop = log.scrollHeight;
+  // Persist
+  let logs = [];
+  try { logs = JSON.parse(localStorage.getItem(LOG_KEY) || '[]'); } catch(e) {}
+  logs.unshift({time, msg, type});
+  if (logs.length > 30) logs.length = 30;
+  localStorage.setItem(LOG_KEY, JSON.stringify(logs));
+}
+
+function loadLog() {
+  let logs = [];
+  try { logs = JSON.parse(localStorage.getItem(LOG_KEY) || '[]'); } catch(e) {}
+  if (logs.length === 0) return;
+  const log = document.getElementById('sync-log');
+  log.classList.remove('hidden');
+  log.innerHTML = '';
+  logs.slice().reverse().forEach(l => {
+    const cls = l.type ? 'log-' + l.type : '';
+    log.innerHTML += `<span class="${cls}">[${l.time}] ${l.msg}</span>\n`;
+  });
+  log.scrollTop = log.scrollHeight;
+}
+
+// ============================================================
+// EXPORT CSV
+// ============================================================
+function exportCSV() {
+  const users = filteredUsers.length > 0 ? filteredUsers : allUsers;
+  let csv = 'Nome,E-mail,Treinos,Semanas,Volume (kg),Sequência,Cadastro,Status\n';
+  users.forEach(u => {
+    const status = u.novo ? 'Novo' : u.ativos ? 'Ativo' : 'Inativo';
+    csv += `"${u.nome}","${u.email}",${u.treinos},${u.semanas},${u.volume},${u.streak},"${u.cadastroStr}","${status}"\n`;
+  });
+  const blob = new Blob(['\uFEFF' + csv], {type: 'text/csv;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `usuarios_treinos_${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+  toast('CSV exportado!', 'success');
+}
+
+// ============================================================
+// COPY CODE
+// ============================================================
+function copyCode(id) {
+  const el = document.getElementById(id);
+  const text = el.innerText.replace('Copiar\n', '');
+  navigator.clipboard.writeText(text).then(() => toast('Código copiado!', 'success'));
+}
+
+// ============================================================
+// UTILS
+// ============================================================
+function esc(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function toast(msg, type = '') {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'show' + (type ? ' ' + type : '');
+  clearTimeout(window._toastT);
+  window._toastT = setTimeout(() => el.className = '', 2800);
+}
+
+// Close modals on overlay click
+document.getElementById('modal-user').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+document.getElementById('modal-delete').addEventListener('click', function(e) {
+  if (e.target === this) closeDeleteModal();
+});
+
+// Keyboard
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') { closeModal(); closeDeleteModal(); }
+  if (e.key === 'Enter' && document.getElementById('login-screen').style.display !== 'none' && !document.getElementById('login-screen').classList.contains('hidden')) {
+    doAdminLogin();
+  }
+});
+</script>
+</body>
+</html>
