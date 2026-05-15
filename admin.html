@@ -464,9 +464,8 @@ function doGet(e) {
 
         <div style="margin-top:24px;padding-top:20px;border-top:1px solid var(--border)">
           <p style="font-size:12px;color:var(--muted);line-height:1.8">
-            ⚠️ <strong style="color:var(--text)">Importante:</strong> A senha admin padrão é <code style="color:var(--accent);background:var(--bg3);padding:1px 6px;border-radius:4px">admin123</code>. 
-            Para alterar, edite a constante <code style="color:var(--accent);background:var(--bg3);padding:1px 6px;border-radius:4px">ADMIN_PASS</code> no JavaScript desta página antes de publicar.<br><br>
-            🔒 Os dados dos usuários ficam salvos no <code style="color:var(--accent);background:var(--bg3);padding:1px 6px;border-radius:4px">localStorage</code> do navegador de cada um. Esta página admin lê esses dados apenas quando aberta no mesmo navegador onde os usuários estão cadastrados (ex: para testes locais). Para um sistema multi-dispositivo real, integre com backend/Firebase.
+            🔒 A senha de acesso é verificada pelo servidor (Apps Script) — não fica armazenada nesta página.<br><br>
+            Para alterar a senha, edite a variável <code style="color:var(--accent);background:var(--bg3);padding:1px 6px;border-radius:4px">ADMIN_PASSWORD</code> diretamente no seu Apps Script e reimplante.
           </p>
         </div>
       </div>
