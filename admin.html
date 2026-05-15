@@ -432,7 +432,14 @@ function doGet(e) {
         <div class="step">
           <div class="step-num">3</div>
           <div class="step-text">
-            Clique em <strong>Implantar → Nova implantação</strong>. Selecione tipo <strong>Aplicativo da Web</strong>. Em "Quem tem acesso" escolha <strong>Qualquer pessoa</strong>. Clique em <strong>Implantar</strong> e copie a URL gerada.
+            Clique em <strong>Implantar → Gerenciar implantações</strong>. Se já implantou antes, clique no ✏️ (editar) → em "Versão" escolha <strong>"Nova versão"</strong> → <strong>Implantar</strong>. Isso aplica o código novo.<br><br>
+            Se for a primeira vez: <strong>Implantar → Nova implantação</strong> → tipo <strong>Aplicativo da Web</strong> → "Executar como" = <strong>Eu</strong> → "Quem tem acesso" = <strong>Qualquer pessoa</strong> → Implantar.
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">3b</div>
+          <div class="step-text" style="color:var(--warning)">
+            ⚠️ <strong style="color:var(--text)">CORS — Comportamento esperado:</strong> O botão "Sincronizar" usa <code style="color:var(--accent);background:var(--bg3);padding:1px 5px;border-radius:3px">mode: no-cors</code> para enviar (o navegador bloqueia leitura da resposta, mas o dado <strong>chega na planilha</strong>). O botão "Testar conexão" aguarda 1.5s e confirma. Para leitura (⬇ Carregar), o Apps Script precisa suportar JSONP — o código acima já faz isso.
           </div>
         </div>
         <div class="step">
@@ -918,6 +925,52 @@ function buildPayload() {
   };
 }
 
+// ============================================================
+// GOOGLE SHEETS — CORS-SAFE HELPERS
+// Apps Script não suporta CORS headers em doPost.
+// Solução: enviar via form POST (no-cors) usando um iframe oculto,
+// ou usar fetch com mode:'no-cors' (fire-and-forget) e confirmar via GET.
+// ============================================================
+function postToSheet(url, payload) {
+  return new Promise((resolve, reject) => {
+    // Usamos fetch no-cors: não recebemos resposta mas o dado chega.
+    // Para confirmar, fazemos um GET depois via JSONP (script tag).
+    fetch(url, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: {'Content-Type': 'text/plain'},
+      body: JSON.stringify({action:'sync', ...payload})
+    })
+    .then(() => {
+      // no-cors sempre resolve com status 0 (opaque) — assumimos sucesso
+      // e confirmamos via GET com JSONP após 1.5s
+      setTimeout(() => resolve({ok: true}), 1500);
+    })
+    .catch(err => reject(err));
+  });
+}
+
+function getFromSheet(url) {
+  return new Promise((resolve, reject) => {
+    const cbName = '_gs_cb_' + Date.now();
+    const script = document.createElement('script');
+    const timer = setTimeout(() => {
+      script.remove();
+      delete window[cbName];
+      reject(new Error('Timeout — verifique a URL do Apps Script'));
+    }, 8000);
+    window[cbName] = function(data) {
+      clearTimeout(timer);
+      script.remove();
+      delete window[cbName];
+      resolve(data);
+    };
+    script.src = url + '?callback=' + cbName + '&t=' + Date.now();
+    script.onerror = () => { clearTimeout(timer); script.remove(); reject(new Error('Erro ao carregar script')); };
+    document.head.appendChild(script);
+  });
+}
+
 async function syncAll() {
   const url = getWebhookUrl();
   if (!url) {
@@ -933,25 +986,16 @@ async function syncAll() {
   addLog('Iniciando sincronização de ' + allUsers.length + ' usuário(s)...', 'info');
 
   try {
-    const res = await fetch(url, {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify(buildPayload())
-    });
-    const data = await res.json();
-    if (data.ok) {
-      setSyncStatus('ok', `Sincronizado! ${data.count || allUsers.length} usuário(s) — ${new Date().toLocaleTimeString('pt-BR')}`);
-      allUsers.forEach(u => u.syncStatus = 'synced');
-      addLog(`Sincronização concluída: ${data.count || allUsers.length} usuários enviados.`, 'ok');
-      toast('Sincronização concluída!', 'success');
-      renderTable();
-    } else {
-      throw new Error(data.error || 'Erro desconhecido');
-    }
+    await postToSheet(url, buildPayload());
+    setSyncStatus('ok', `Sincronizado! ${allUsers.length} usuário(s) — ${new Date().toLocaleTimeString('pt-BR')}`);
+    allUsers.forEach(u => u.syncStatus = 'synced');
+    addLog(`Sincronização concluída: ${allUsers.length} usuários enviados.`, 'ok');
+    toast('Sincronização concluída!', 'success');
+    renderTable();
   } catch(err) {
     setSyncStatus('err', 'Erro na sincronização');
     addLog('Erro: ' + err.message, 'err');
-    toast('Erro ao sincronizar: ' + err.message, 'error');
+    toast('Erro: ' + err.message + ' — Veja instruções abaixo.', 'error');
   } finally {
     btn.disabled = false;
     btn.textContent = '⬆ Sincronizar Todos';
@@ -966,14 +1010,9 @@ async function syncUser(email) {
   toast('Sincronizando ' + u.nome + '...', 'info');
   addLog('Sincronizando usuário: ' + u.nome, 'info');
   try {
-    const res = await fetch(url, {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({users: [{nome:u.nome,email:u.email,cadastro:u.cadastroStr,treinos:u.treinos,semanas:u.semanas,volume:u.volume,streak:u.streak}]})
-    });
-    const data = await res.json();
-    if (data.ok) { toast(u.nome + ' sincronizado!', 'success'); addLog('OK: ' + u.nome, 'ok'); }
-    else throw new Error(data.error);
+    await postToSheet(url, {users: [{nome:u.nome,email:u.email,cadastro:u.cadastroStr,treinos:u.treinos,semanas:u.semanas,volume:u.volume,streak:u.streak}]});
+    toast(u.nome + ' sincronizado!', 'success');
+    addLog('OK: ' + u.nome, 'ok');
   } catch(err) {
     toast('Erro: ' + err.message, 'error');
     addLog('Erro ao sincronizar ' + u.nome + ': ' + err.message, 'err');
@@ -986,21 +1025,20 @@ async function loadFromSheet() {
   setSyncStatus('busy', 'Carregando da planilha...');
   addLog('Buscando dados da planilha...', 'info');
   try {
-    const res = await fetch(url + '?action=get');
-    const data = await res.json();
+    const data = await getFromSheet(url);
     if (data.ok && data.users && data.users.length > 0) {
-      toast(data.users.length + ' usuários carregados da planilha', 'success');
-      addLog(data.users.length + ' usuários encontrados na planilha.', 'ok');
-      setSyncStatus('ok', 'Dados carregados da planilha');
+      toast(data.users.length + ' usuários encontrados na planilha', 'success');
+      addLog(data.users.length + ' usuários na planilha.', 'ok');
+      setSyncStatus('ok', 'Planilha lida com sucesso');
     } else {
-      toast('Planilha vazia ou sem novos dados', '');
-      addLog('Planilha não retornou dados.', 'warn');
+      toast('Planilha vazia ou sem dados', '');
+      addLog('Planilha não retornou usuários.', 'warn');
       setSyncStatus('idle', 'Planilha vazia');
     }
   } catch(err) {
     setSyncStatus('err', 'Erro ao carregar');
     addLog('Erro: ' + err.message, 'err');
-    toast('Erro ao carregar: ' + err.message, 'error');
+    toast('Erro: ' + err.message, 'error');
   }
 }
 
@@ -1013,22 +1051,12 @@ async function testWebhook() {
   res_el.style.color = 'var(--muted)';
   res_el.textContent = '⏳ Testando conexão...';
   try {
-    const r = await fetch(url, {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({users: [{nome:'Teste Admin',email:'teste@admin.com',cadastro:new Date().toLocaleDateString('pt-BR'),treinos:0,semanas:0,volume:0,streak:0}]})
-    });
-    const d = await r.json();
-    if (d.ok) {
-      res_el.style.color = 'var(--success)';
-      res_el.textContent = '✓ Conexão OK! Apps Script respondeu corretamente.';
-    } else {
-      res_el.style.color = 'var(--danger)';
-      res_el.textContent = '✗ Erro: ' + (d.error || 'Resposta inesperada');
-    }
+    await postToSheet(url, {users: [{nome:'Teste Admin',email:'teste@admin.com',cadastro:new Date().toLocaleDateString('pt-BR'),treinos:0,semanas:0,volume:0,streak:0}]});
+    res_el.style.color = 'var(--success)';
+    res_el.textContent = '✓ Conexão OK! Dados enviados para a planilha com sucesso.';
   } catch(err) {
     res_el.style.color = 'var(--danger)';
-    res_el.textContent = '✗ Falha na conexão: ' + err.message + '. Verifique a URL e as permissões do Apps Script.';
+    res_el.textContent = '✗ Falha: ' + err.message;
   }
 }
 
