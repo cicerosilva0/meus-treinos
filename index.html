@@ -69,6 +69,22 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:5px}
 .card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:20px}
 .card-sm{padding:14px 16px}
 
+/* ===== ROLE SELECTOR ===== */
+#role-selector{margin-bottom:0}
+.role-cards{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:0}
+.role-card{
+  background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);
+  padding:24px 16px;cursor:pointer;transition:all .2s;
+  display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;
+  color:var(--text);font-family:'DM Sans',sans-serif;
+}
+.role-card:hover{border-color:var(--accent);background:rgba(200,242,94,.04);transform:translateY(-2px)}
+.role-icon{font-size:32px;line-height:1;margin-bottom:4px}
+.role-label{font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--accent);letter-spacing:1.5px}
+.role-sub{font-size:12px;color:var(--muted)}
+.auth-back{font-size:12px;color:var(--muted);cursor:pointer;margin-bottom:14px;display:inline-flex;align-items:center;gap:4px;transition:color .2s}
+.auth-back:hover{color:var(--accent)}
+
 /* ===== AUTH SCREENS ===== */
 #auth-screen{
   min-height:100vh;display:flex;align-items:center;justify-content:center;
@@ -256,9 +272,26 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:5px}
       <p>Organize seus treinos e evolua</p>
     </div>
 
+    <!-- ROLE SELECTOR -->
+    <div id="role-selector">
+      <div class="role-cards">
+        <button class="role-card" onclick="selectRole('user')">
+          <span class="role-icon">🏋️</span>
+          <span class="role-label">Usuário</span>
+          <span class="role-sub">Acessar meus treinos</span>
+        </button>
+        <button class="role-card" onclick="selectRole('admin')">
+          <span class="role-icon">⚙️</span>
+          <span class="role-label">Admin</span>
+          <span class="role-sub">Painel administrativo</span>
+        </button>
+      </div>
+    </div>
+
     <!-- LOGIN -->
-    <div id="login-panel">
+    <div id="login-panel" class="hidden">
       <div class="auth-card">
+        <div class="auth-back" onclick="showRoleSelector()">← Voltar</div>
         <h2>Entrar</h2>
         <div class="form-stack">
           <div class="input-group">
@@ -281,6 +314,7 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:5px}
     <!-- REGISTER -->
     <div id="register-panel" class="hidden">
       <div class="auth-card">
+        <div class="auth-back" onclick="showRoleSelector()">← Voltar</div>
         <h2>Criar conta</h2>
         <div class="form-stack">
           <div class="input-group">
@@ -558,6 +592,21 @@ function currentWeekDays() {
 // ============================================================
 // AUTH
 // ============================================================
+function showRoleSelector() {
+  document.getElementById('role-selector').classList.remove('hidden');
+  document.getElementById('login-panel').classList.add('hidden');
+  document.getElementById('register-panel').classList.add('hidden');
+}
+
+function selectRole(role) {
+  if (role === 'admin') {
+    window.location.href = 'admin.html';
+    return;
+  }
+  document.getElementById('role-selector').classList.add('hidden');
+  showPanel('login');
+}
+
 function showPanel(p) {
   document.getElementById('login-panel').classList.toggle('hidden', p!=='login');
   document.getElementById('register-panel').classList.toggle('hidden', p!=='register');
